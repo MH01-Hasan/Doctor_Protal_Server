@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const port = process.env.PORT || 5000
 require('dotenv').config()
@@ -25,6 +26,14 @@ const client = new MongoClient(uri, {
 });
 
 //dota Collection with mongo
+
+function verifyJwt(req, res, next) {
+    const authHeader = req.headers.authorization
+    if (!authHeader) {
+        return res.status(401).send('unauthorization')
+    }
+    const token = authHeader.split(' ')[1]
+}
 
 async function run() {
     try {
@@ -54,6 +63,7 @@ async function run() {
         // Booking data get //
         app.get('/bookings', async (req, res) => {
             const email = req.query.email
+
             const query = { email: email }
             const bookings = await BookingsCollection.find(query).toArray()
             res.send(bookings)
@@ -61,7 +71,7 @@ async function run() {
         })
 
         // Booking data Post/
-        app.post('/bookings', async (req, res) => {
+        app.post('/bookings', verifyJwt, async (req, res) => {
             const booking = req.body
             const query = {
                 appointmentdate: booking?.appointmentdate,
@@ -78,6 +88,21 @@ async function run() {
             res.send(result)
 
         })
+
+        app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await UsersCollection.findOne(query)
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: "1h" })
+                return res.send({ accessTocken: token })
+            }
+            res.status(403).send({ accessTocken: "" })
+            console.log(user)
+
+        })
+
+
         //Users Data Post//
         app.post('/users', async (req, res) => {
             const user = req.body
