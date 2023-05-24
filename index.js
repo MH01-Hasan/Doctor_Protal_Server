@@ -70,8 +70,8 @@ async function run() {
             res.send(option)
         })
 
-        // Booking data get //
-        app.get('/bookings', verifyJWt, async (req, res) => {
+        // Booking data get // verifyJWt,
+        app.get('/bookings', verifyJWt,  async (req, res) => {
             const email = req.query.email;
             const decodedEmail = req.decoded.email;
             console.log(decodedEmail)
@@ -105,11 +105,11 @@ async function run() {
         })
 
         app.get('/jwt', async (req, res) => {
-            const email = req.query.email;
+            const email = req?.query?.email;
             const query = { email: email };
             const user = await UsersCollection.findOne(query)
             if (user) {
-                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: "1h" })
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN)// { expiresIn: "1h" }
                 return res.send({ accessTocken: token })
             }
             res.status(403).send({ accessTocken: "" })
@@ -130,16 +130,16 @@ async function run() {
         })
 
 
-        // Make Admin///
-        app.put('/updateuser/admin/:id', verifyJWt, async (req, res) => {
-            const decodedEmail = req.decoded.email
+        // Make Admin/// verifyJWt,
+        app.put('/updateuser/admin/:id',verifyJWt,  async (req, res) => {
+            const decodedEmail = req?.decoded?.email
             const query = { email: decodedEmail }
             const user = await UsersCollection.findOne(query)
 
             if (user?.role !== "admin") {
                 return res.status(403).send({ massege: "forbidden access" })
             }
-            const id = req.params.id;
+            const id = req?.params?.id;
             const filter = { _id: new ObjectId(id) }
             const options = { upsert: true };
             const updatedDoc = {
