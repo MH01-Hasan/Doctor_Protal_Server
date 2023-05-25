@@ -70,6 +70,15 @@ async function run() {
             res.send(option)
         })
 
+        app.get('/appointmentspecility',async(req,res)=>{
+
+            const query = {}
+            const result = await appormentCollection.find(query).project({
+                name:1
+            }).toArray()
+            res.send(result)
+        })
+
         // Booking data get //
         app.get('/bookings', verifyJWt, async (req, res) => {
             const email = req.query.email;
@@ -109,7 +118,7 @@ async function run() {
             const query = { email: email };
             const user = await UsersCollection.findOne(query)
             if (user) {
-                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: "1h" })
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN)
                 return res.send({ accessTocken: token })
             }
             res.status(403).send({ accessTocken: "" })
