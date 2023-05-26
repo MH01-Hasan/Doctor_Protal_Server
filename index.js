@@ -115,11 +115,21 @@ async function run() {
             res.status(403).send({ accessTocken: "" })
 
         })
-
+//get all users
         app.get('/users', async (req, res) => {
             const query = {}
             const result = await UsersCollection.find(query).toArray()
             res.send(result)
+        })
+
+        // check user admin 
+        app.get('/users/admin/:email',async(req,res)=>{
+            const email = req.params.email
+            const query = { email: email }
+            const user = await UsersCollection.findOne(query)
+            res.send({isadmin: user?.role === "admin"})
+
+
         })
 
         //Users Data Post//
