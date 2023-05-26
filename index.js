@@ -51,6 +51,7 @@ async function run() {
         const appormentCollection = client.db("DoctorProtal").collection('appointmentOptions');
         const BookingsCollection = client.db("DoctorProtal").collection('bookings');
         const UsersCollection = client.db("DoctorProtal").collection('users');
+        const DoctorCollection = client.db("DoctorProtal").collection('Doctor');
 
         //all get api 
         app.get('/appointmentOptions', async (req, res) => {
@@ -70,8 +71,17 @@ async function run() {
             res.send(option)
         })
 
-        // Booking data get // verifyJWt,
-        app.get('/bookings', verifyJWt,  async (req, res) => {
+        app.get('/appointmentspecility',async(req,res)=>{
+
+            const query = {}
+            const result = await appormentCollection.find(query).project({
+                name:1
+            }).toArray()
+            res.send(result)
+        })
+
+        // Booking data get //
+        app.get('/bookings', verifyJWt, async (req, res) => {
             const email = req.query.email;
             const decodedEmail = req.decoded.email;
             console.log(decodedEmail)
@@ -109,7 +119,7 @@ async function run() {
             const query = { email: email };
             const user = await UsersCollection.findOne(query)
             if (user) {
-                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN)// { expiresIn: "1h" }
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN)
                 return res.send({ accessTocken: token })
             }
             res.status(403).send({ accessTocken: "" })
@@ -136,6 +146,13 @@ async function run() {
         app.post('/users', async (req, res) => {
             const user = req.body
             const result = await UsersCollection.insertOne(user)
+            res.send(result)
+        })
+
+        app.post('/doctor',async(req,res)=>{
+            const doctor = req.body
+            console.log(doctor)
+            const result = await DoctorCollection.insertOne(doctor)
             res.send(result)
         })
 
